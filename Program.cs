@@ -6,6 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Obtener la cadena de conexión para usarla en el contexto
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
+builder.Services.AddBlazorBootstrap();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
