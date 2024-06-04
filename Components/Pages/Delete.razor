@@ -1,0 +1,111 @@
+﻿@page "/Aticulos/Delete"
+@page "/Aticulos/Delete/{ ArticuloId:int}"
+@inject ArticulosService articulosService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Articulos</PageTitle>
+
+<div class="container">
+    <div class="card shadow-header">
+        <div class="card-header text-center py-2 rounded">
+            <h3><strong>Eliminar Articulos</strong></h3>
+        </div>
+        
+        <div class="card-header">
+            <h3 class="text-danger">¿Estás seguro de que quieres eliminar estos Articulos?</h3>
+        </div>
+
+        @if (Articulo != null)
+        {
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <h3 class="text-center"><strong>Datos de la Articulos</strong></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="border-primary border-2 borde">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <ul class="list-unstyled">
+                                                    <li><strong>ArticuloId:</strong> @Articulo.ArticuloId</li>
+                                                    <li><strong>Descripcion:</strong> @Articulo.Descripcion</li>
+                                                    <li><strong>Costo:</strong> @Articulo.Costo</li>
+                                                    <li><strong>Ganancia:</strong> @Articulo.Ganancia</li>
+                                                    <li><strong>Precio:</strong> @Articulo.Precio</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="card-footer">
+           
+
+            <button class="btn btn-outline-primary" @onclick="EliminarMeta"><Icon Name="IconName.Trash" /> Eliminar</button>
+            <button class="btn btn-outline-secondary" @onclick="Volver"><Icon Name="IconName.Arrow90DegLeft" /> Volver</button>
+
+        </div>
+    </div>
+</div>
+
+@if (Articulo == null)
+{
+    <A>Articulo no encontrada.</A>
+}
+
+@code {
+    [Parameter]
+    public int ArticuloId { get; set; }
+    public Articulos? Articulo { get; set; } // Cambiado a permitir nulos
+  
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ArticuloId != 0)
+        {
+            Articulo = await articulosService.Buscar(ArticuloId);
+        }
+        else
+        {
+            Console.WriteLine("ArticuloId es igual a 0");
+        }
+    }
+
+    public async Task EliminarMeta()
+    {
+        if (ArticuloId == 0 || Articulo == null)
+        {
+            Console.Write("Los ArticuloId es igual a 0");
+            return; // Salir del método si el TecnicoId es inválido
+        }
+
+        Console.WriteLine("Eliminando los Articulo...");
+
+        if (await articulosService.Eliminar(ArticuloId))
+        {
+            Console.WriteLine("Eliminado correctamente los Articulo.");
+
+        }
+        else
+        {
+          Console.WriteLine("Error al eliminar  los Articulo");
+            
+        }
+    }
+
+    public async Task Volver()
+    {
+        NavigationManager.NavigateTo("/Aticulos/index");
+    }
+   
+
+}
