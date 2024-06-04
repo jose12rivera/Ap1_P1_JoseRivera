@@ -1,0 +1,155 @@
+﻿@page "/Aticulos/Editar"
+@page "/Aticulos/Editar/{ ArticuloId:int}"
+@inject ArticulosService ArticulosService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Registro de Articulos</PageTitle>
+<EditForm Model="Articulo" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <Toasts class="p-3" Messages="MensajeToast" Placement="ToastsPlacement.TopRight" />
+
+    <div style="width: 100%; text-align: right;">
+
+        <button class="btn btn-outline-secondary" @onclick="Retroceder"><Icon Name="IconName.Arrow90DegLeft" /> Volver</button>
+
+    </div>
+
+    <div class="card">
+        <div class="card-header  text-center py-2 rounded">
+            <h3> <i class="fas fa-clipboard-list"></i> Registro Articulos</h3>
+        </div>
+
+        <div class="card-body">
+            <!-- ArticuloId -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for=" ArticuloId" class="form-label"> ArticuloId:</label>
+                    <div class="input-group">
+                        <InputNumber @bind-Value="Articulo.ArticuloId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        <ValidationMessage For="@(() => Articulo.ArticuloId)" />
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Descripcion -->
+            <div class="mb-3">
+                <label for="Descripcion" class="form-label">Descripcion:</label>
+                <InputText @bind-Value="Articulo.Descripcion" class="form-control" />
+                <ValidationMessage For="@(() => Articulo.Descripcion)" />
+            </div>
+
+            <!-- Costo -->
+            <div class="mb-3">
+                <label for="Costo" class="form-label">Costo:</label>
+                <InputNumber @bind-Value="Articulo.Costo" class="form-control" />
+                <ValidationMessage For="@(() => Articulo.Costo)" />
+            </div>
+
+            <!-- Ganancia -->
+            <div class="mb-3">
+                <label for="Ganancia" class="form-label">Ganancia:</label>
+                <InputNumber @bind-Value="Articulo.Ganancia" class="form-control" />
+                <ValidationMessage For="@(() => Articulo.Ganancia)" />
+            </div>
+            <!-- Precio -->
+            <div class="mb-3">
+                <label for="Precio" class="form-label">Precio:</label>
+                <InputNumber @bind-Value="Articulo.Precio" class="form-control" />
+                <ValidationMessage For="@(() => Articulo.Precio)" />
+            </div>
+
+
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                <button class="btn btn-outline-success"><Icon Name="IconName.Floppy" /> Guardar</button>
+                <button class="btn btn-outline-primary" @onclick="Eliminar"><Icon Name="IconName.Trash" /> Eliminar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ArticuloId { get; set; }
+    private Articulos? Articulo = new Articulos();
+    private bool Existe = false;
+    List<ToastMessage> MensajeToast = new List<ToastMessage>();
+
+
+    public async Task Nuevo()
+    {
+        Articulo = new Articulos();
+        Existe = false;
+    }
+
+    public async Task Buscar()
+    {
+        Existe = false;
+        var ArticuloEncontrado = await ArticulosService.Buscar(Articulo.ArticuloId);
+
+        if (ArticuloEncontrado != null)
+        {
+            Articulo = ArticuloEncontrado;
+        }
+        else
+        {
+            await Nuevo();
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (await Validar())
+        {
+            return;
+        }
+
+        var guardo = await ArticulosService.Guardar(Articulo);
+        if (guardo)
+        {
+            Mensaje(ToastType.Success, "Guardado correctamente de la Articulo.");
+            Nuevo();
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await ArticulosService.Eliminar(Articulo.ArticuloId);
+        Nuevo();
+        Mensaje(ToastType.Success, "Eliminado correctamente la Articulo.");
+
+    }
+
+    public async Task Retroceder()
+    {
+        NavigationManager.NavigateTo("/Aticulos/index");
+    }
+
+    public async Task<bool> Validar()
+    {
+        var listaArticulos = await ArticulosService.Listar(A => A.Descripcion.ToLower() == Articulo.Descripcion.ToLower() && A.ArticuloId != Articulo.ArticuloId);
+        Existe = listaArticulos.Any();
+        return Existe;
+    }
+
+    private ToastMessage CreateToastMessage(ToastType toastType, string mensaje)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = "Notificación",
+            HelpText = $"{DateTime.Now}",
+            Message = mensaje,
+        };
+
+    private void Mensaje(ToastType toastType, string mensaje)
+    {
+        MensajeToast.Add(CreateToastMessage(toastType, mensaje));
+    }
+}
+
+
