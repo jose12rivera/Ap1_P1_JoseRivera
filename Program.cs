@@ -1,4 +1,8 @@
 using Ap1_P1_JoseRivera.Components;
+using Ap1_P1_JoseRivera.DAL;
+using Ap1_P1_JoseRivera.Service;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +12,8 @@ builder.Services.AddRazorComponents()
 
 // Obtener la cadena de conexión para usarla en el contexto
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
-
+builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
+builder.Services.AddScoped<ArticulosService>();
 builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
