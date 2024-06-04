@@ -4,7 +4,8 @@
 @rendermode InteractiveServer
 
 <PageTitle>Registro de Articulos</PageTitle>
-<EditForm Model="Articulo" OnValidSubmit="Guardar">
+<EditForm Model="Articulo" OnValidSubmit="Guardar"> Formname"Articulo dom"
+    
     <DataAnnotationsValidator />
 
     <Toasts class="p-3" Messages="MensajeToast" Placement="ToastsPlacement.TopRight" />
@@ -61,7 +62,7 @@
 
         <div class="card-footer bg-light d-flex justify-content-center mt-3">
             <div class="btn-group">
-                <button type="submit" class="btn btn-outline-success"><Icon Name="IconName.Floppy" /> Guardar</button>
+                <button type="submit" class="btn btn-outline-success" @onclick="Guardar"><Icon Name="IconName.Floppy" /> Guardar</button>
                 <button type="button" class="btn btn-outline-primary" @onclick="Eliminar"><Icon Name="IconName.Trash" /> Eliminar</button>
             </div>
         </div>
