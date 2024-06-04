@@ -10,6 +10,7 @@ namespace Ap1_P1_JoseRivera.DAL
         : base(options) { }
 
         public DbSet<Articulos> Articulos { get; set; }
+        
 
     }
 }
