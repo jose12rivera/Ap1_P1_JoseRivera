@@ -1,0 +1,125 @@
+﻿@page "/Aticulos/index"
+@inject ArticulosService ArticulosService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="ListaArticulos" class="border shadow-lg p-3 rounded">
+    <div class="card-header text-center py-2 rounded">
+        <h3 style="font-weight: bold;" class="mb-0">Consulta Articulos</h3>
+    </div>
+
+    <div class="row mb-3 align-items-end">
+        <div class="col-md-3">
+            <label for="Filtro" class="form-label">Filtrar por:</label>
+            <select @bind="filtro" class="form-select">
+                <option value="id">ID</option>
+                <option value="Descripcion">Descripcion</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="ValorFiltro" class="form-label">Búsqueda:</label>
+            <div class="input-group">
+                <input @bind="valorFiltro" class="form-control" placeholder="Buscar" />
+                <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                    <span class="bi bi-search"></span> Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-9"></div>
+            <div class="col-md-3 text-end">
+                <a href="/Aticulos/Create" class="btn btn-outline-primary">
+                    <Icon Name="IconName.Plus" /> Nuevo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead class="bi-primary text-white">
+                <tr>
+                    <th>ArticuloId</th>
+                    <th>Descripcion</th>
+                    <th>Costo</th>
+                    <th>Ganancia</th>
+                    <th>Precio</th>
+                    <th>Detalles</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var A in ListaArticulos)
+                {
+                    <tr>
+                        <td>@A.ArticuloId</td>
+                        <td>@A.Descripcion</td>
+                        <td>@A.Costo</td>
+                        <td>@A.Ganancia</td>
+                        <td>@A.Precio</td>
+                        <td>
+                            <a class="btn btn-outline-primary" href="/Aticulos/Details/@A.ArticuloId">
+                                <Icon Name="IconName.Eye" /> Ver
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline-primary" href="/Aticulos/Editar/@A.ArticuloId">
+                                <Icon Name="IconName.Pencil" /> Modificar
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline-primary" href="/Aticulos/Delete/@A.ArticuloId">
+                                <Icon Name="IconName.Trash" /> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-end">
+        <p>Total de Articulos: @ListaArticulos.Count</p>
+    </div>
+</EditForm>
+
+@code {
+    public List<Articulos> ListaArticulos { get; set; } = new List<Articulos>();
+    private string filtro = "id";
+    private string valorFiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaArticulos = await ArticulosService.Listar(A => A.ArticuloId > 0);
+    }
+
+    private async Task Buscar()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(valorFiltro))
+            {
+                if (filtro == "id" && int.TryParse(valorFiltro, out int ArticuloId))
+                {
+                    ListaArticulos = await ArticulosService.Listar(A => A.ArticuloId == ArticuloId);
+                }
+                else if (filtro == "Descripcion")
+                {
+                    ListaArticulos = await ArticulosService.Listar(A => A.Descripcion.Contains(valorFiltro));
+                }
+            }
+            else
+            {
+                ListaArticulos = await ArticulosService.Listar(A => true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en Buscar(): {ex.Message}");
+            ListaArticulos = new List<Articulos>();
+        }
+    }
+}
