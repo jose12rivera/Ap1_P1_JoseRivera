@@ -1,80 +1,58 @@
-﻿@page "/Aticulos/Details"
-@page "/Aticulos/Details/{ ArticuloId:int}"
-@inject ArticulosService articulosService
-@inject NavigationManager NavigationManager
+﻿@page "/Articulos/Details"
+@page "/Articulos/Details/{ArticuloId:int}"
+@inject ArticulosService ArticuloService
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
+@inject IJSRuntime IJSRuntime
 
-<PageTitle>Detalles Articulos</PageTitle>
+<PageTitle>Detalles de la Articulos</PageTitle>
 
-<div class="container">
-    <div class="card shadow-header">
-        <div class="card-header text-center py-2 rounded">
-            <h3><strong>Detalles Articulos</strong></h3>
-        </div>
-        
-       
-
-        @if (Articulo != null)
-        {
+@if (Articulo != null)
+{
+    <div class="container">
+        <div class="card shadow-header">
+            <div class="card-header text-center py-2 rounded">
+                <h3 class="text-center"><strong>Detalles del Articulo</strong></h3>
+            </div>
             <div class="container">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card shadow-lg">
-                            <div class="card-header">
-                                <h3 class="text-center"><strong>Datos de la Articulos</strong></h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="border-primary border-2 borde">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-8">
-                                                <ul class="list-unstyled">
-                                                    <li><strong>ArticuloId:</strong> @Articulo.ArticuloId</li>
-                                                    <li><strong>Descripcion:</strong> @Articulo.Descripcion</li>
-                                                    <li><strong>Costo:</strong> @Articulo.Costo</li>
-                                                    <li><strong>Ganancia:</strong> @Articulo.Ganancia</li>
-                                                    <li><strong>Precio:</strong> @Articulo.Precio</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><strong>ArticuloId:</strong> @Articulo.ArticuloId</li>
+                                <li><strong>Descripcion:</strong> @Articulo.Descripcion</li>
+                                <li><strong>Ganancia:</strong> @Articulo.Ganancia</li>
+                                <li><strong>Costo:</strong> @Articulo.Costo</li>
+                                <li><strong>Precio:</strong> @Articulo.Precio</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
-        }
-        <div class="card-footer">
-           
-            <button class="btn btn-outline-secondary" @onclick="Volver"><Icon Name="IconName.Arrow90DegLeft" /> Volver</button>
-
+            <div class="card-footer">
+                <button class="btn btn-outline-secondary" @onclick="Volver"><Icon Name="IconName.Arrow90DegLeft" /> Volver</button>
+            </div>
         </div>
     </div>
-</div>
-
-@if (Articulo == null)
+}
+else
 {
-    <A>Articulo no encontrada.</A>
+    <A>Articulo no encontrado.</A>
 }
 
 @code {
     [Parameter]
     public int ArticuloId { get; set; }
-    public Articulos? Articulo { get; set; } // Cambiado a permitir nulos
-   
+    public Articulos? Articulo { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        
-            Articulo = await articulosService.Buscar(ArticuloId);
-      
+        Articulo = await ArticuloService.Buscar(ArticuloId);
     }
+
     public async Task Volver()
     {
-        NavigationManager.NavigateTo("/Aticulos/index");
+        navigationManager.NavigateTo("/Articulos/Index");
     }
-
-
 }
 

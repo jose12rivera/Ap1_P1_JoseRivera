@@ -1,11 +1,11 @@
-﻿@page "/Aticulos/Create"
-@inject ArticulosService ArticulosService
-@inject NavigationManager NavigationManager
+﻿@page "/Articulos/Create"
+@inject ArticulosService ArticuloService
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
+@inject IJSRuntime IJSRuntime
 
 <PageTitle>Registro de Articulos</PageTitle>
-<EditForm Model="Articulo" OnValidSubmit="Guardar"> Formname"Articulo dom"
-    
+<EditForm Model="Articulo" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
     <Toasts class="p-3" Messages="MensajeToast" Placement="ToastsPlacement.TopRight" />
@@ -16,7 +16,7 @@
 
     <div class="card">
         <div class="card-header text-center py-2 rounded">
-            <h3> <i class="fas fa-clipboard-list"></i> Registro Articulos</h3>
+            <h3> <i class="fas fa-clipboard-list"></i> Registro de Articulos</h3>
         </div>
 
         <div class="card-body">
@@ -30,28 +30,24 @@
                     </div>
                 </div>
             </div>
-
             <!-- Descripcion -->
             <div class="mb-3">
                 <label for="Descripcion" class="form-label">Descripcion:</label>
                 <InputText @bind-Value="Articulo.Descripcion" class="form-control" />
                 <ValidationMessage For="@(() => Articulo.Descripcion)" />
             </div>
-
-            <!-- Costo -->
-            <div class="mb-3">
-                <label for="Costo" class="form-label">Costo:</label>
-                <InputNumber @bind-Value="Articulo.Costo" class="form-control" />
-                <ValidationMessage For="@(() => Articulo.Costo)" />
-            </div>
-
             <!-- Ganancia -->
             <div class="mb-3">
                 <label for="Ganancia" class="form-label">Ganancia:</label>
                 <InputNumber @bind-Value="Articulo.Ganancia" class="form-control" />
                 <ValidationMessage For="@(() => Articulo.Ganancia)" />
             </div>
-
+            <!-- Costo -->
+            <div class="mb-3">
+                <label for="Costo" class="form-label">Costo:</label>
+                <InputNumber @bind-Value="Articulo.Costo" class="form-control" />
+                <ValidationMessage For="@(() => Articulo.Costo)" />
+            </div>
             <!-- Precio -->
             <div class="mb-3">
                 <label for="Precio" class="form-label">Precio:</label>
@@ -62,8 +58,8 @@
 
         <div class="card-footer bg-light d-flex justify-content-center mt-3">
             <div class="btn-group">
-                <button type="submit" class="btn btn-outline-success" @onclick="Guardar"><Icon Name="IconName.Floppy" /> Guardar</button>
-                <button type="button" class="btn btn-outline-primary" @onclick="Eliminar"><Icon Name="IconName.Trash" /> Eliminar</button>
+                <button class="btn btn-outline-success" @onclick="Guardar"><Icon Name="IconName.Floppy" /> Guardar</button>
+                <button class="btn btn-outline-primary" @onclick="Eliminar"><Icon Name="IconName.Trash" /> Eliminar</button>
             </div>
         </div>
     </div>
@@ -72,10 +68,19 @@
 @code {
     [Parameter]
     public int ArticuloId { get; set; }
-    private Articulos Articulo = new Articulos();
+
+    public Articulos Articulo { get; set; } = new Articulos();
+    List<ToastMessage> MensajeToast = new List<ToastMessage>();
+    public string mensaje;
     private bool Existe = false;
 
-    List<ToastMessage> MensajeToast = new List<ToastMessage>();
+    protected override async Task OnInitializedAsync()
+    {
+        if (ArticuloId != 0)
+        {
+            await Buscar();
+        }
+    }
 
     public async Task Nuevo()
     {
@@ -86,7 +91,7 @@
     public async Task Buscar()
     {
         Existe = false;
-        var ArticuloEncontrado = await ArticulosService.Buscar(Articulo.ArticuloId);
+        var ArticuloEncontrado = await ArticuloService.Buscar(Articulo.ArticuloId);
 
         if (ArticuloEncontrado != null)
         {
@@ -94,40 +99,45 @@
         }
         else
         {
-            await Nuevo();
+            Nuevo();
         }
     }
 
     public async Task Guardar()
     {
+        Articulo.Precio = (Articulo.Costo * Articulo.Ganancia / 100) + Articulo.Costo;
         if (await Validar())
         {
+
             return;
         }
 
-        var guardo = await ArticulosService.Guardar(Articulo);
+        var guardo = await ArticuloService.Guardar(Articulo);
         if (guardo)
         {
-            Mensaje(ToastType.Success, "Guardado correctamente el articulo.");
-            await Nuevo();
+            Mensaje(ToastType.Success, "Guardado correctamente el artículo.");
+            Nuevo();
         }
+
     }
 
     public async Task Eliminar()
     {
-        var eliminado = await ArticulosService.Eliminar(Articulo.ArticuloId);
-        await Nuevo();
-        Mensaje(ToastType.Success, "Eliminado correctamente el articulo.");
+
+        var eliminado = await ArticuloService.Eliminar(Articulo.ArticuloId);
+        Nuevo();
+        Mensaje(ToastType.Success, "Eliminado correctamente el artículo.");
+
     }
 
-    public async Task Retroceder()
+    private void Retroceder()
     {
-        NavigationManager.NavigateTo("/Aticulos/index");
+        navigationManager.NavigateTo("/Articulos/Index");
     }
 
     public async Task<bool> Validar()
     {
-        var listaArticulos = await ArticulosService.Listar(A => A.Descripcion.ToLower() == Articulo.Descripcion.ToLower() && A.ArticuloId != Articulo.ArticuloId);
+        var listaArticulos = await ArticuloService.Listar(A => A.Descripcion.ToLower() == Articulo.Descripcion.ToLower() && A.ArticuloId != Articulo.ArticuloId);
         Existe = listaArticulos.Any();
         return Existe;
     }
