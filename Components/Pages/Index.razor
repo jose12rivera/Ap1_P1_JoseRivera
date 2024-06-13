@@ -1,9 +1,9 @@
-﻿@page "/Aticulos/index"
-@inject ArticulosService ArticulosService
-@inject NavigationManager NavigationManager
+﻿@page "/Articulos/Index"
+@inject ArticulosService ArticuloService
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<EditForm Model="ListaArticulos" class="border shadow-lg p-3 rounded">
+<EditForm Model="listaArticulos" class="border shadow-lg p-3 rounded">
     <div class="card-header text-center py-2 rounded">
         <h3 style="font-weight: bold;" class="mb-0">Consulta Articulos</h3>
     </div>
@@ -13,7 +13,7 @@
             <label for="Filtro" class="form-label">Filtrar por:</label>
             <select @bind="filtro" class="form-select">
                 <option value="id">ID</option>
-                <option value="Descripcion">Descripcion</option>
+                <option value="Descripcion">Descripción</option>
             </select>
         </div>
         <div class="col-md-6">
@@ -31,8 +31,8 @@
         <div class="row">
             <div class="col-md-9"></div>
             <div class="col-md-3 text-end">
-                <a href="/Aticulos/Create" class="btn btn-outline-primary">
-                    <Icon Name="IconName.Plus" /> Nuevo
+                <a href="/Articulos/Create" class="btn btn-success" type="button">
+                    <span class="bi bi-pencil-square" aria-hidden="Create"></span> Crear
                 </a>
             </div>
         </div>
@@ -43,9 +43,9 @@
             <thead class="bi-primary text-white">
                 <tr>
                     <th>ArticuloId</th>
-                    <th>Descripcion</th>
-                    <th>Costo</th>
+                    <th>Descripción</th>
                     <th>Ganancia</th>
+                    <th>Costo</th>
                     <th>Precio</th>
                     <th>Detalles</th>
                     <th>Editar</th>
@@ -53,26 +53,26 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var A in ListaArticulos)
+                @foreach (var A in listaArticulos)
                 {
                     <tr>
                         <td>@A.ArticuloId</td>
                         <td>@A.Descripcion</td>
-                        <td>@A.Costo</td>
                         <td>@A.Ganancia</td>
+                        <td>@A.Costo</td>
                         <td>@A.Precio</td>
                         <td>
-                            <a class="btn btn-outline-primary" href="/Aticulos/Details/@A.ArticuloId">
+                            <a class="btn btn-outline-primary" href="/Articulos/Details/@A.ArticuloId">
                                 <Icon Name="IconName.Eye" /> Ver
                             </a>
                         </td>
                         <td>
-                            <a class="btn btn-outline-primary" href="/Aticulos/Editar/@A.ArticuloId">
+                            <a class="btn btn-outline-primary" href="/Articulos/Editar/@A.ArticuloId">
                                 <Icon Name="IconName.Pencil" /> Modificar
                             </a>
                         </td>
                         <td>
-                            <a class="btn btn-outline-primary" href="/Aticulos/Delete/@A.ArticuloId">
+                            <a class="btn btn-outline-primary" href="/Articulos/Delete/@A.ArticuloId">
                                 <Icon Name="IconName.Trash" /> Eliminar
                             </a>
                         </td>
@@ -82,18 +82,25 @@
         </table>
     </div>
     <div class="card-footer text-end">
-        <p>Total de Articulos: @ListaArticulos.Count</p>
+        <A>Total de Articulos: @listaArticulos.Count</A>
     </div>
 </EditForm>
 
 @code {
-    public List<Articulos> ListaArticulos { get; set; } = new List<Articulos>();
+    public List<Articulos> listaArticulos { get; set; } = new List<Articulos>();
     private string filtro = "id";
     private string valorFiltro = "";
 
     protected override async Task OnInitializedAsync()
     {
-        ListaArticulos = await ArticulosService.Listar(A => A.ArticuloId > 0);
+        try
+        {
+            listaArticulos = await ArticuloService.Listar(c => c.ArticuloId > 0);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing: {ex.Message}");
+        }
     }
 
     private async Task Buscar()
@@ -104,22 +111,22 @@
             {
                 if (filtro == "id" && int.TryParse(valorFiltro, out int ArticuloId))
                 {
-                    ListaArticulos = await ArticulosService.Listar(A => A.ArticuloId == ArticuloId);
+                    listaArticulos = await ArticuloService.Listar(A => A.ArticuloId == ArticuloId);
                 }
                 else if (filtro == "Descripcion")
                 {
-                    ListaArticulos = await ArticulosService.Listar(A => A.Descripcion.Contains(valorFiltro));
+                    listaArticulos = await ArticuloService.Listar(A => A.Descripcion == valorFiltro);
                 }
             }
             else
             {
-                ListaArticulos = await ArticulosService.Listar(A => true);
+                listaArticulos = await ArticuloService.Listar(A => true);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error en Buscar(): {ex.Message}");
-            ListaArticulos = new List<Articulos>();
+            listaArticulos = new List<Articulos>();
         }
     }
 }

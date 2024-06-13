@@ -1,8 +1,9 @@
-﻿@page "/Aticulos/Delete"
-@page "/Aticulos/Delete/{ ArticuloId:int}"
-@inject ArticulosService articulosService
-@inject NavigationManager NavigationManager
+﻿@page "/Articulos/Delete"
+@page "/Articulos/Delete/{ArticuloId:int}"
+@inject ArticulosService ArticuloService
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
+@inject IJSRuntime IJSRuntime
 
 <PageTitle>Eliminar Articulos</PageTitle>
 
@@ -11,9 +12,9 @@
         <div class="card-header text-center py-2 rounded">
             <h3><strong>Eliminar Articulos</strong></h3>
         </div>
-        
+        <Toasts class="p-3" Messages="MensajeToast" Placement="ToastsPlacement.TopRight" />
         <div class="card-header">
-            <h3 class="text-danger">¿Estás seguro de que quieres eliminar estos Articulos?</h3>
+            <h3 class="text-danger">¿Estás seguro de que quieres eliminar este Articulo?</h3>
         </div>
 
         @if (Articulo != null)
@@ -23,7 +24,7 @@
                     <div class="col-md-6">
                         <div class="card shadow-lg">
                             <div class="card-header">
-                                <h3 class="text-center"><strong>Datos de la Articulos</strong></h3>
+                                <h3 class="text-center"><strong>Datos del Articulo</strong></h3>
                             </div>
                             <div class="card-body">
                                 <div class="border-primary border-2 borde">
@@ -33,8 +34,8 @@
                                                 <ul class="list-unstyled">
                                                     <li><strong>ArticuloId:</strong> @Articulo.ArticuloId</li>
                                                     <li><strong>Descripcion:</strong> @Articulo.Descripcion</li>
-                                                    <li><strong>Costo:</strong> @Articulo.Costo</li>
                                                     <li><strong>Ganancia:</strong> @Articulo.Ganancia</li>
+                                                    <li><strong>Costo:</strong> @Articulo.Costo</li>
                                                     <li><strong>Precio:</strong> @Articulo.Precio</li>
                                                 </ul>
                                             </div>
@@ -59,24 +60,24 @@
 
 @if (Articulo == null)
 {
-    <A>Articulo no encontrada.</A>
+    <A>Articulo no encontrado.</A>
 }
 
 @code {
     [Parameter]
     public int ArticuloId { get; set; }
-    public Articulos? Articulo { get; set; } // Cambiado a permitir nulos
-  
+    public Articulos? Articulo{ get; set; } // Cambiado a permitir nulos
+    List<ToastMessage> MensajeToast = new List<ToastMessage>();
 
     protected override async Task OnInitializedAsync()
     {
         if (ArticuloId != 0)
         {
-            Articulo = await articulosService.Buscar(ArticuloId);
+            Articulo = await ArticuloService.Buscar(ArticuloId);
         }
         else
         {
-            Console.WriteLine("ArticuloId es igual a 0");
+            Console.WriteLine("El ArticuloId es igual a 0");
         }
     }
 
@@ -84,28 +85,40 @@
     {
         if (ArticuloId == 0 || Articulo == null)
         {
-            Console.Write("Los ArticuloId es igual a 0");
+            Console.Write("El articulo es igual a 0");
             return; // Salir del método si el TecnicoId es inválido
         }
 
-        Console.WriteLine("Eliminando los Articulo...");
+        Console.WriteLine("Eliminando El Articulo...");
 
-        if (await articulosService.Eliminar(ArticuloId))
+        if (await ArticuloService.Eliminar(ArticuloId))
         {
-            Console.WriteLine("Eliminado correctamente los Articulo.");
+            Mensaje(ToastType.Success, "Eliminado correctamente El Articulo.");
 
         }
         else
         {
-          Console.WriteLine("Error al eliminar  los Articulo");
-            
+            Mensaje(ToastType.Danger, "Error al eliminar  El Articulo.");
+
         }
     }
 
     public async Task Volver()
     {
-        NavigationManager.NavigateTo("/Aticulos/index");
+        navigationManager.NavigateTo("/Articulos/Index");
     }
-   
 
+    private ToastMessage CreateToastMessage(ToastType toastType, string mensaje)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = "Notificación",
+            HelpText = $"{DateTime.Now}",
+            Message = mensaje,
+        };
+
+    private void Mensaje(ToastType toastType, string mensaje)
+    {
+        MensajeToast.Add(CreateToastMessage(toastType, mensaje));
+    }
 }
