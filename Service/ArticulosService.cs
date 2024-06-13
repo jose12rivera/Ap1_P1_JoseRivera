@@ -25,38 +25,38 @@ namespace Ap1_P1_JoseRivera.Service
         {
             return await _contexto.Articulos.AnyAsync(A => A.Descripcion == Descripcion);
         }
-        private async Task<bool> Insertar(Articulos Articulos)
+        private async Task<bool> Insertar(Articulos Articulo)
         {
 
-            _contexto.Articulos.Add(Articulos);
+            _contexto.Articulos.Add(Articulo);
             return await _contexto.SaveChangesAsync() > 0;
         }
 
-        private async Task<bool> Modificar(Articulos Articulos)
+        private async Task<bool> Modificar(Articulos Articulo)
         {
-            _contexto.Articulos.Update(Articulos);
+            _contexto.Articulos.Update(Articulo);
             return await _contexto.SaveChangesAsync() > 0;
 
         }
 
-        public async Task<bool> Guardar(Articulos Articulos)
+        public async Task<bool> Guardar(Articulos Articulo)
         {
 
-            if (!await Existe(Articulos.ArticuloId))
-                return await Insertar(Articulos);
+            if (!await Existe(Articulo.ArticuloId))
+                return await Insertar(Articulo);
             else
-                return await Modificar(Articulos);
+                return await Modificar(Articulo);
 
         }
 
         public async Task<bool> Eliminar(int id)
         {
 
-            var Meta = await _contexto.Articulos.FindAsync(id);
-            if (Meta == null)
+            var Articulo = await _contexto.Articulos.FindAsync(id);
+            if (Articulo == null)
                 return false;
 
-            _contexto.Articulos.Remove(Meta);
+            _contexto.Articulos.Remove(Articulo);
             return await _contexto.SaveChangesAsync() > 0;
 
         }
